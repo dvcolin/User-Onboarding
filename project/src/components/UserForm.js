@@ -3,36 +3,97 @@ import axios from 'axios';
 import { Form, Field, withFormik } from 'formik';
 import * as Yup from 'yup';
 import '../App.css'
+import styled from 'styled-components'
+import UserCards from './UserCards'
+import UserCard from './UserCard'
 
+const StyledForm = styled(Form)`
+    width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #414a4c;
+    border-radius: 5px;
+`;
 
-const UserForm = ({ values, touched, errors }) => {
+const StyledField = styled(Field)`
+    width: 75%;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    border: none;
+    margin: 1.5rem 0;
+    padding: 1rem;
+`;
+
+const Error = styled.p`
+    padding: 0;
+    margin: 0;
+    color: red;
+`;
+
+const SubmitButton = styled.button`
+    background: none;
+    padding: 1rem 1.6rem;
+    border: 2px solid lightgray;
+    border-radius: 5px;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    margin: 1.5rem 0;
+    color: lightgray;
+
+    :hover {
+        color: white;
+        border-color: white;
+    }
+`;
+
+const UserForm = ({ values, touched, errors, status }) => {
     const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        if (status) {
+            setUsers(users => [...users, status])
+        }
+    }, [status]);
+
     return (
         <div>
-            <h1>User Form</h1>
-
-            <Form>
-                <Field className='form-input' type='text' name='name' placeholder='Enter name' />
+            <StyledForm>
+            <h1 style={{color: 'white'}}>User Form</h1>
+                <StyledField type='text' name='name' placeholder='Enter name' />
                 {touched.name && errors.name && (
-                    <p>{errors.name}</p>
+                    <Error>{errors.name}</Error>
                 )}
 
-                <Field className='form-input' type='email' name='email' placeholder='Enter email' />
+                <StyledField type='email' name='email' placeholder='Enter email' />
                 {touched.email && errors.email && (
-                    <p>{errors.email}</p>
+                    <Error>{errors.email}</Error>
                 )}
 
-                <Field className='form-input' type='password' name='password' placeholder='Enter password' />
+                <StyledField type='password' name='password' placeholder='Enter password' />
                 {touched.password && errors.password && (
-                    <p>{errors.password}</p>
+                    <Error>{errors.password}</Error>
                 )}
 
-                <label>
+                <label style={{color: 'white'}}>
                 I accept the terms and conditions
-                <Field className='form-input' className='form-input' type='checkbox' name='terms' checked={values.terms} />
+                <StyledField type='checkbox' name='terms' checked={values.terms} />
                 </label>
-                <button className='form-input' type='submit'>Submit</button>
-            </Form>
+                {touched.terms && errors.terms && (
+                    <Error>{errors.terms}</Error>
+                )}
+                <SubmitButton type='submit'>Submit</SubmitButton>
+            </StyledForm>
+            <UserCards>
+            {users.map(user => 
+                <div style={{
+                    height: '100px',
+                }}>
+                    <p>{user.name}</p>
+                    <p>{user.email}</p>
+                </div>
+            )}
+            </UserCards>
         </div>
     )
 }
@@ -51,16 +112,18 @@ const FormikUserForm = withFormik({
         name: Yup.string().required('Please enter valid name'),
         email: Yup.string().email().required('Please enter valid email'),
         password: Yup.string().min(6).max(12).required('Please enter valid password'),
+        terms: Yup.bool().oneOf([true], 'Must agree to terms and conditions'),
       }),
 
-    handleSubmit(values) {
+    handleSubmit(values, { setStatus }) {
         axios
         .post('https://reqres.in/api/users', values)
         .then(res => {
-            console.log(res)
+            console.log('res', res)
+            setStatus(res.data);
         })
         .catch(err => {
-            console.log(err)
+            console.log(err.response)
         })
     }
 })(UserForm);
