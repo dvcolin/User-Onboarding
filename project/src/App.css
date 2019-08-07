@@ -1,5 +1,9 @@
 .App {
   text-align: center;
+  width: 80%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
 }
 
 .App-logo {
@@ -30,4 +34,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.form-input {
+  display: block;
 }
